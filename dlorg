@@ -1,0 +1,173 @@
+#!/bin/bash
+
+# Program currently breaks on whitespace, working on a fix
+# Program to store downloaded files into correct sub directories
+# If sub directories do not exist program will proceed to create them
+
+# Change this value if you are adding more sub directories (Remember to add desired extensions below corresponding
+# to new subdirectory)
+# You will need to add a For loop to SEPERATE for new directory to be added due to Bash does not supporting multidimensional arrays
+# This will be defined in dlorg -help
+DIRECTORIES=("Images" "Videos" "Audio" "Documents" "Applications" "Unknown")
+
+# Change these values to ADD or DELETE extensions
+Images=("jpg" "jpeg" "png" "pdf""pjpeg" "pjp" "svg" "ico" "webp" "gif")
+Videos=("mov" "wmv" "avi" "flv" "f4v" "swf" "mkv" "webm" "html5")
+Audio=("m4a" "flac" "mp3" "mp4" "wav" "wma" "aac")
+Documents=("psd" "pdf" "pptx" "pkg" "json" "php" "csv" "txt"  "ai" "indd" "raw" "doc" "docx")
+Applications=("exe" "dmg" "app" "deb" "zip" "rpm" "tar.gz" "jar")
+
+
+# Function to go through Downloads directory and find out if
+# desired sub-directories are currently in Downloads
+# if not, will created desired directories
+function MKDIR {
+	USER="$(whoami)"
+	cd /Users/$USER/Downloads
+	# Finds all directories currently in Downloads
+	ARRAY="$(find . -maxdepth 1 -mindepth 1 -type d)"
+	ARRSIZE=0
+	# Loops through directories, finding the amount of them
+	for item in $ARRAY; do
+		 ARRSIZE=$(expr $ARRSIZE + 1)
+	done
+	# Checks to see if DIRECTORIES exists, if not creates them
+	for dir in ${DIRECTORIES[@]}; do
+		COUNT=0
+		for item in $ARRAY; do 
+			if [ $item != $dir ]; then 
+				COUNT=$(expr $COUNT + 1) 
+			fi
+		done
+		if [ $COUNT == $ARRSIZE ]; then
+			mkdir $dir
+		fi
+	done
+}
+
+# Currently does not support spaces in files (working on fix)
+# Seperates files into their current sub-directories
+function SEPERATE {
+	# Grabs all files
+	FILES="$(ls -p | grep -v /)"
+	# Loops over every file in Downloads and sorts them
+	for file in $FILES; do
+		EXT="${file##*.}"
+		COUNT=0
+		for ext in ${Images[@]}; do
+			if [ $EXT == $ext ]; then
+				if [ $COUNT == 0 ]; then
+					mv "$file" Images
+					COUNT=$(expr $COUNT + 1)
+				fi
+			fi
+		done
+		if [ $COUNT == 0 ]; then
+			for ext in ${Videos[@]}; do
+				if [ $EXT == $ext ]; then
+					mv "$file" Videos
+					COUNT=$(expr $COUNT + 1)
+				fi
+			done
+		fi
+		if [ $COUNT == 0 ]; then
+                        for ext in ${Audio[@]}; do
+                                if [ $EXT == $ext ]; then
+                                        mv "$file" Audio
+                                        COUNT=$(expr $COUNT + 1)
+                                fi
+                        done
+                fi
+		if [ $COUNT == 0 ]; then
+                        for ext in ${Documents[@]}; do
+                                if [ $EXT == $ext ]; then
+                                        mv "$file" Documents
+                                        COUNT=$(expr $COUNT + 1)
+                                fi
+                        done
+                fi
+		if [ $COUNT == 0 ]; then
+                        for ext in ${Applications[@]}; do
+                                if [ $EXT == $ext ]; then
+                                        mv "$file" Applications
+                                        COUNT=$(expr $COUNT + 1)
+                                fi
+                        done
+                fi
+		if [ $COUNT == 0 ]; then
+			mv "$file" Unknown
+		fi
+
+	done
+}
+
+function FINISH {
+
+cat <<'EOF'
+  ______ _       _     _              _ 
+ |  ____(_)     (_)   | |            | |
+ | |__   _ _ __  _ ___| |__   ___  __| |
+ |  __| | | '_ \| / __| '_ \ / _ \/ _` |
+ | |    | | | | | \__ \ | | |  __/ (_| |
+ |_|    |_|_| |_|_|___/_| |_|\___|\__,_|
+
+EOF
+
+}
+
+function HELP {
+cat <<'EOF'
+dlorg is a program written by Dominic O'Donnell | https://github.com/Dominicod . 
+This program is designed to organize your downloads folder into subdirectories while
+allowing the user to edit each extension and and create new subdirectories allowing
+for ease of use. (Outside of having to add a new for loop due to bash not supporting
+multidimensional arrays.
+
+COMMANDS:
+
+./dlorg | Organizes files
+./dlorg -v | Version of dlorg
+./dlorg -h | Help section of dlorg
+
+SETUP:
+
+1. To run dlorg first move dlorg to your $PATH and make sure your correct terminal is
+selected.
+
+2. Change dlorg's mode with chmod +x dlorg
+
+This program should now work.
+
+EDIT EXTENSIONS:
+
+1. Use your editor vim/nano/ect to enter into dlorg, find the extension you want to edit
+at the top of the file and add your edits.
+
+EDIT SUBDIRECTORIES:
+
+1. To edit sub directories you will first add the directory to the DIRECTORIES varible.
+
+2. Then move down to SEPERATE function and copy the for loop however changing where the copied
+subdirectory varibles are located and replacing them with the new directory name. (case-sensitive)
+
+EOF
+}
+
+function VERSION {
+	echo "dlorg: Version 1.0;"
+}
+
+# Runs MKDIR to check for activate directories, then seperates files
+function run {
+	MKDIR
+	SEPERATE
+	FINISH
+}
+
+if [ $1 == -h ]; then
+	HELP
+elif [ $1 == -v ]; then
+	VERSION
+else
+	run
+fi
