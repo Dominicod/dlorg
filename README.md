@@ -4,7 +4,9 @@ dlorg is a program written by Dominic O'Donnell | https://github.com/Dominicod .
 COMMANDS:
 
 ./dlorg | Organizes files
+
 ./dlorg -v | Version of dlorg
+
 ./dlorg -h | Help section of dlorg
 
 SETUP:
