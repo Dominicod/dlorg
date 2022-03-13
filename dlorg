@@ -31,17 +31,9 @@ function MKDIR {
 	for item in $ARRAY; do
 		 ARRSIZE=$(expr $ARRSIZE + 1)
 	done
-	# Checks to see if DIRECTORIES exists, if not creates them
+	# Does not check to see if each of ${DIRECTORIES[@] exists, simply attempts to create them and suppresses error messages if they do already exist.
 	for dir in ${DIRECTORIES[@]}; do
-		COUNT=0
-		for item in $ARRAY; do 
-			if [ $item != $dir ]; then 
-				COUNT=$(expr $COUNT + 1) 
-			fi
-		done
-		if [ $COUNT == $ARRSIZE ]; then
-			mkdir $dir
-		fi
+		mkdir -p $dir;
 	done
 }
 
@@ -154,7 +146,7 @@ EOF
 }
 
 function VERSION {
-	echo "dlorg: Version 1.0;"
+	echo "dlorg: Version 1.1;"
 }
 
 # Runs MKDIR to check for activate directories, then seperates files
